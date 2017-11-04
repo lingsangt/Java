@@ -1,0 +1,351 @@
+import GUI
+
+var rangeX, rangeY, button, playsong, erasenote, menu, compose, menu2, Quit, eraseall : int
+var timedisplay, notedisplay, song : string
+var key : string (1)
+var mainWin := Window.Open ("position:200;200, graphics: 640;400") 
+%playsong is the button to play the song
+%erasenote is the button to erase the last note
+%menu is the button to go to Main Menu from the introduction
+%menu2 is the button to go to Main Menu from display
+%compose is the button on Main Menu to go to display and userInput 
+%Quit is the button on the Main Menu to quit the program
+%eraseall is the button on display to erase all the notes
+%rangeX, rangeY, and button is for mousewhere
+%timedisplay stores the time values for the song for display 
+%notedisplay stores the notes of the song for display
+%song stores the song for playing
+%key is for the pause program
+%mainWin is the main window
+
+timedisplay := "Time: "
+notedisplay := "Notes:"
+song := ""
+
+%Pause Program is for closing windows
+proc pauseProgram
+    setscreen ("nocursor")
+    put ""
+    locate (5, 23)
+    put "Press any key to close this window."
+    getch (key) 
+end pauseProgram
+
+%Title clears the screen and puts the title on the top centred
+procedure title
+    cls
+    locate (1, 33)
+    put "Composer Wizard"
+end title
+
+%background for introduction, Main Menu, and good bye
+proc background
+    drawfilloval (100, 200, 10, 10, 15) %Quarter note
+    drawline (110, 200, 110, 250, 15)
+    drawoval (500, 250, 10, 10, 84) %half note 
+    drawline (490, 250, 490, 200, 84)
+    drawfilloval (200, 150, 10, 10, 92) %Eighth note
+    drawline (210, 150, 210, 190, 92)
+    drawline (210, 190, 230, 170, 92)
+    for x : 1 .. 100 by 20 %Staff at bottom 
+        drawline (0, x + 30, 640, x + 30, 7)
+    end for
+    drawfilloval (110, 100, 10, 10, 7) %quarter note
+    drawline (100, 100, 100, 40, 7)
+    for x : 1 .. 120 by 30 %sixteenth notes
+        drawfilloval (250 + x, 110, 10, 10, 7) 
+        drawline (240 + x, 110, 240 + x, 40, 7)
+    end for
+    drawline (240, 50, 330, 50, 7)
+    drawline (240, 40, 330, 40, 7)
+    drawoval (400, 40, 10, 10, 7) %whole note
+    drawline (380, 110, 380, 30, 7) %bar line 
+end background
+
+%goodbye puts a good bye message and allows the user to close the window
+proc goodbye
+    title
+    background
+    locate (3, 36)
+    put "Goodbye!"
+    locate (5, 34)
+    put "By: Ling-Sang" 
+    locate (7, 24)
+    pauseProgram
+    Window.Close (mainWin)
+end goodbye
+
+%errorwindow is for errortrapping if the user did something wrong
+procedure errorwindow
+    var error := Window.Open ("position:300;300, graphics: 640;400") %Opens the errortrap window
+    Window.SetActive (error)
+    setscreen ("nocursor")
+    colourback(100)
+    title
+    background
+    if length (timedisplay) > 156 then %If the length of the piece is too long
+        timedisplay := timedisplay (1 .. (length (timedisplay) - 5)) 
+        locate (3, 33)
+        put "No more notes!"
+        song := song (1 .. (length (song) - 1))
+    elsif length (timedisplay) > length (notedisplay) + 5 then %if the user selects a note before choosing a time value 
+        timedisplay := timedisplay (1 .. (length (timedisplay) - 5))
+        locate (3, 10)
+        put "You must select a note before you select another time value!"
+        song := song (1 .. (length (song) - 1)) 
+    else
+        if length (notedisplay) > length (timedisplay) then %if the user starts a new note before finishing the previous one
+            notedisplay := notedisplay (1 .. (length (notedisplay) - 5))
+            locate (3, 22)
+            put "You must select the time value first!"
+            song := song (1 .. (length (song) - 2))
+        end if
+    end if
+    pauseProgram
+    Window.Close (error)
+end errorwindow
+
+%erase is used to erase the last note
+procedure erase
+    if length (notedisplay) > 6 then %if the user only selected the time value
+        timedisplay := timedisplay (1 .. length (timedisplay) - 5)
+        song := song (1 .. length (song) - 1) 
+        if length (notedisplay) > length (timedisplay) then %if the user has selected both the time value and the pitch
+            notedisplay := notedisplay (1 .. length (notedisplay) - 5)
+            song := song (1 .. length (song) - 2) 
+        end if
+    end if
+end erase
+
+%eraseAll is used to erase all the notes
+proc eraseAll
+    timedisplay := "Time: "
+    song := ""
+    notedisplay := "Notes:"
+end eraseAll
+
+%play music is used to play the music
+procedure playmusic
+    Music.Play (song)
+end playmusic
+
+%mainMenu gives the user 2 options: Compose or Quit
+proc mainMenu
+    GUI.Hide (menu)
+    GUI.Hide (menu2)
+    GUI.Hide (playsong)
+    GUI.Hide (erasenote)
+    drawfillbox (0, 0, 640, 640, 100)
+    title 
+    background
+    locate (3, 36)
+    put "Main Menu"
+    locate (5, 31)
+    put "Choose Compose or Quit"
+    GUI.Show (compose)
+    GUI.Show (Quit)
+end mainMenu
+
+%User Input
+proc userInput
+    loop
+        mousewhere (rangeX, rangeY, button)
+        if button = 1 then
+            if rangeX >= 160 and rangeY >= 265 and rangeX <= 236 and rangeY <= 295 then         %wholenote 
+                timedisplay := timedisplay + "  4  "
+                song := song + "1"
+            elsif rangeX >= 256 and rangeY >= 265 and rangeX <= 332 and rangeY <= 295 then         %halfnote 
+                timedisplay := timedisplay + "  2  "
+                song := song + "2"
+            elsif rangeX >= 352 and rangeY >= 265 and rangeX <= 428 and rangeY <= 295 then         %quarternote 
+                timedisplay := timedisplay + "  1  "
+                song := song + "4"
+            elsif rangeX >= 448 and rangeY >= 265 and rangeX <= 524 and rangeY <= 295 then         %eigthnote 
+                timedisplay := timedisplay + " 1/2 "
+                song := song + "8"
+            elsif rangeX >= 544 and rangeY >= 265 and rangeX <= 620 and rangeY <= 295 then         %sixteenthnote 
+                timedisplay := timedisplay + " 1/16"
+                song := song + "6"
+            elsif rangeX >= 160 and rangeY >= 225 and rangeX <= 236 and rangeY <= 255 and length (timedisplay) = length (notedisplay) then      %wholerest 
+                timedisplay := timedisplay + "  4  "
+                song := song + "4p"
+                notedisplay := notedisplay + " rest"
+            elsif rangeX >= 256 and rangeY >= 225 and rangeX <= 332 and rangeY <= 255 and length (timedisplay) = length (notedisplay) then         %halfrest 
+                timedisplay := timedisplay + "  2  "
+                song := song + "2p"
+                notedisplay := notedisplay + " rest"
+            elsif rangeX >= 352 and rangeY >= 225 and rangeX <= 428 and rangeY <= 255 and length (timedisplay) = length (notedisplay) then         %quarterrest 
+                timedisplay := timedisplay + "  1  "
+                song := song + "1p"
+                notedisplay := notedisplay + " rest"
+            elsif rangeX >= 448 and rangeY >= 225 and rangeX <= 524 and rangeY <= 255 and length (timedisplay) = length (notedisplay) then         %eigthrest 
+                timedisplay := timedisplay + " 1/2 "
+                song := song + "8p"
+                notedisplay := notedisplay + " rest"
+            elsif rangeX >= 544 and rangeY >= 225 and rangeX <= 620 and rangeY <= 255 and length (timedisplay) = length (notedisplay) then        %sixteenthrest 
+                timedisplay := timedisplay + " 1/16"
+                song := song + "6p"
+                notedisplay := notedisplay + " rest"
+            elsif rangeX >= 250 and rangeY >= 165 and rangeX <= 265 and rangeY <= 185 or rangeX >= 250 and rangeY >= 145 and rangeX <= 270 and rangeY <= 165 then %C 
+                notedisplay := notedisplay + "  C  "
+                song := song + "c "
+            elsif rangeX >= 275 and rangeY >= 165 and rangeX <= 285 and rangeY <= 185 or rangeX >= 270 and rangeY >= 145 and rangeX <= 290 and rangeY <= 165 then %D 
+                notedisplay := notedisplay + "  D  "
+                song := song + "d "
+            elsif rangeX >= 295 and rangeY >= 165 and rangeX <= 310 and rangeY <= 185 or rangeX >= 290 and rangeY >= 145 and rangeX <= 310 and rangeY <= 165 then %E 
+                notedisplay := notedisplay + "  E  "
+                song := song + "e "
+            elsif rangeX >= 310 and rangeY >= 165 and rangeX <= 325 and rangeY <= 185 or rangeX >= 310 and rangeY >= 145 and rangeX <= 330 and rangeY <= 165 then %F 
+                notedisplay := notedisplay + "  F  "
+                song := song + "f "
+            elsif rangeX >= 335 and rangeY >= 165 and rangeX <= 345 and rangeY <= 185 or rangeX >= 330 and rangeY >= 145 and rangeX <= 350 and rangeY <= 165 then %G 
+                notedisplay := notedisplay + "  G  "
+                song := song + "g "
+            elsif rangeX >= 355 and rangeY >= 165 and rangeX <= 365 and rangeY <= 185 or rangeX >= 350 and rangeY >= 145 and rangeX <= 370 and rangeY <= 165 then  %A 
+                notedisplay := notedisplay + "  A  "
+                song := song + "notedisplay "
+            elsif rangeX >= 375 and rangeY >= 165 and rangeX <= 390 and rangeY <= 185 or rangeX >= 370 and rangeY >= 145 and rangeX <= 390 and rangeY <= 165 then %B 
+                notedisplay := notedisplay + "  B  "
+                song := song + "b "
+            elsif rangeX >= 265 and rangeY >= 165 and rangeX <= 275 and rangeY <= 185 then %C#/Db 
+                notedisplay := notedisplay + "C#/Db"
+                song := song + "c+"
+            elsif rangeX >= 285 and rangeY >= 165 and rangeX <= 295 and rangeY <= 185 then %D#/Eb 
+                notedisplay := notedisplay + "D#/Eb"
+                song := song + "d+"
+            elsif rangeX >= 325 and rangeY >= 165 and rangeX <= 335 and rangeY <= 185 then %F#/Gb 
+                notedisplay := notedisplay + "F#/Gb"
+                song := song + "f+"
+            elsif rangeX >= 345 and rangeY >= 165 and rangeX <= 355 and rangeY <= 185 then %G#/Ab 
+                notedisplay := notedisplay + "G#/Ab"
+                song := song + "g+"
+            else
+                if rangeX >= 365 and rangeY >= 165 and rangeX <= 375 and rangeY <= 185 then %A#/Bb 
+                    notedisplay := notedisplay + "A#/Bb"
+                    song := song + "notedisplay+"
+                end if
+            end if
+            exit when rangeX >= 1 and rangeY >= 370 and rangeX <= 100 and rangeY <= 390 %Exit sign range, exits loop 
+        end if
+        if length (notedisplay) > length (timedisplay) or length (timedisplay) > 156 or length (timedisplay) > length (notedisplay) + 5 then
+            errorwindow
+        end if
+        locate (21, 1) 
+        put notedisplay (1 .. min (length (notedisplay), 76))
+        put timedisplay (1 .. min (length (timedisplay), 76))
+        put "" %For erase all
+        put ""
+        if length (notedisplay) > 76 then 
+            locate (23, 1)
+            put notedisplay (77 .. min (length (notedisplay), 156))
+        end if
+        if length (timedisplay) > 76 then
+            locate (24, 1)
+            put timedisplay (77 .. min (length (timedisplay), 156)) 
+        end if
+        GUI.Show (playsong)
+        GUI.Show (erasenote)
+        GUI.Show (eraseall)
+        GUI.Show (menu2)
+        exit when GUI.ProcessEvent
+        delay (125)
+    end loop
+    mainMenu
+end userInput
+
+%Display
+procedure display
+    GUI.Hide (compose)
+    GUI.Hide (Quit)
+    var wholenote, halfnote, quarternote, eigthnote, sixteenthnote, wholerest, halfrest, quarterrest, eigthrest, sixteenthrest : int
+    %Variables are for selecting the respective time values
+    title
+    locate (5, maxcol div 2 - 5)
+    put "Time Values"
+    drawbox (10, 320, 630, 220, 7) %Outer box
+    drawbox (10, 300, 630, 260, 7) %Innerbox 
+    for x : 150 .. 534 by 96 %Draws lines of the chart
+        drawline (x, 320, x, 220, 7)         %150, 246, 342, 438, 534
+    end for
+    locatexy (198, 310)
+    put 4 ..
+    locatexy (294, 310)
+    put 2 .. 
+    locatexy (390, 310)
+    put 1 ..
+    locatexy (475, 310)
+    put "1/2" ..
+    locatexy (570, 310)
+    put "1/16" ..
+    locatexy (20, 310)
+    put "Number of beats" .. 
+    locatexy (20, 280)
+    put "Note Values" ..
+    locatexy (20, 240)
+    put "Rest Values" ..
+    locatexy (0, 200)
+    put "Select a key:" : 20
+    drawbox (250, 185, 390, 145, 7) %Draws keyboard box 
+    for x : 270 .. 370 by 20  %Draws keyboard lines
+        drawline (x, 185, x, 145, 7)
+    end for
+    drawfillbox (265, 185, 275, 165, 7)       %Draws black keys
+    drawfillbox (285, 185, 295, 165, 7)
+    drawfillbox (325, 185, 335, 165, 7)
+    drawfillbox (345, 185, 355, 165, 7)
+    drawfillbox (365, 185, 375, 165, 7)
+    wholenote := Pic.FileNew ("wholenote.jpg")          %length:76, width:30
+    quarternote := Pic.FileNew ("quarternote.jpg")
+    halfnote := Pic.FileNew ("halfnote.jpg")
+    eigthnote := Pic.FileNew ("eigthnote.jpg")
+    sixteenthnote := Pic.FileNew ("sixteenthnote.jpg") 
+    wholerest := Pic.FileNew ("wholerest.jpg")
+    quarterrest := Pic.FileNew ("quarterrest.jpg")
+    halfrest := Pic.FileNew ("halfrest.jpg")
+    eigthrest := Pic.FileNew (" eigthrest.jpg")
+    sixteenthrest := Pic.FileNew ("sixteenthrest.jpg")
+    Pic.Draw (wholenote, 160, 265, picMerge)         %160, 265, 236, 295
+    Pic.Draw (halfnote, 256, 265, picMerge)
+    Pic.Draw (quarternote, 352, 265, picMerge)
+    Pic.Draw (eigthnote, 448, 265, picMerge)
+    Pic.Draw (sixteenthnote, 544, 265, picMerge)
+    Pic.Draw (wholerest, 160, 225, picMerge)         %160, 255, 236, 225
+    Pic.Draw (halfrest, 256, 225, picMerge)
+    Pic.Draw (quarterrest, 352, 225, picMerge)
+    Pic.Draw (eigthrest, 448, 225, picMerge)
+    Pic.Draw (sixteenthrest, 544, 225, picMerge)
+    locate (3, 1)
+    put "Click on a note value on the chart below:" 
+    locate (18, 1)
+    put "My song:"
+    userInput
+end display
+
+%Introduction
+proc introduction
+    colourback (100) %Background colour
+    title
+    background
+    locate (3, 8)
+    put "This program will allow you to create your own tune! Be creative!" 
+    GUI.Show (menu)
+end introduction
+
+%Buttons
+playsong := GUI.CreateButton (1, 85, 0, "Play my tune!", playmusic)
+erasenote := GUI.CreateButton (125, 85, 0, "Erase last note", erase)
+eraseall := GUI.CreateButton (250, 85, 0, "Start a new tune!", eraseAll) 
+menu := GUI.CreateButton (220, 200, 200, "Click to Proceed to Main Menu", mainMenu)
+menu2 := GUI.CreateButton (1, 370, 100, "Main Menu", mainMenu)
+compose := GUI.CreateButton (270, 250, 100, "Compose", display) 
+Quit := GUI.CreateButton (270, 200, 100, "Quit", GUI.Quit)
+
+%Main Program
+introduction
+%End of Program
+
+%Set Windows
+loop
+    exit when GUI.ProcessEvent
+end loop
+goodbye

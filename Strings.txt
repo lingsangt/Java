@@ -1,0 +1,355 @@
+/*
+Name: Ling-Sang Tse
+Name of the Program: Strings
+Teacher: Ms. Dyke
+Date: December 13, 2008
+Assignment: This program will replace the first occurence of a word within a word with another word (NOT case sensitive).
+Variable Dictionary:
+choice (String): choice enter by the user in the beginning of whether the user wants to continue or not (c or e).
+word1 (String): First string user inputs in askData- it is the word the user wants to find in the phrase
+phrase (String): Second string user inputs in askData- program tries to find word1 in this phrase
+word2 (String): Third string user inputs in askData- replaces the word the user wants to replace in the phrase if the word is found
+*/
+import java.awt.*;
+import hsa.*;
+
+//Class Strings
+public class Strings
+{
+    static Console c;
+    static String choice = "", word1 = "", phrase = "", word2 = "";
+
+
+    //Centres the title and draws a background
+    private static void title ()
+    {
+        c.setTextBackgroundColor (Color.orange);
+        c.setTextColor (Color.yellow);
+        c.clear ();
+        c.setColor (Color.red);
+        //draws the stripe pattern in the background
+        for (int x = 140 ; x < 475 ; x += 50)
+        {
+            c.fillRect (0, x, 640, 25);
+        }
+        c.setColor (Color.green);
+        c.drawOval (220, 150, 200, 200);
+        c.fillOval (280, 180, 25, 50);
+        c.fillOval (320, 180, 25, 50);
+        c.fillArc (270, 230, 100, 75, 180, 180);
+        c.print ("", 36);
+        c.println ("Strings");
+        c.println ();
+    }
+
+
+    //Introduces the program to users
+    public static void intro ()
+    {
+        title ();
+        c.println ("This program will replace the first occurence of a word within a word with ");
+        c.println ("another word (NOT case sensitive).");
+        c.println ();
+        c.print ("Press any key to continue...");
+        c.getChar ();
+
+    }
+
+
+    //Main Menu- User may only quit from here (c to continue or e to exit)
+    public static void mainMenu ()
+    {
+        title ();
+        choice = "";
+        c.setCursor (3, 35);
+        c.println ("Main Menu");
+        c.println ();
+        //whether choice already ahs a valid input or not. If not, it asks for user input.
+        if (choice.equals (""))
+        {
+            c.print ("Press 'c' to continue or 'e' to exit...");
+            choice = c.readLine ();
+            //error trapping- whether choice already ahs a valid input or not. If not, it re-asks for user input.
+            if (!choice.equalsIgnoreCase ("c") && !choice.equalsIgnoreCase ("e"))
+            {
+                new Message ("You must enter either 'c' or 'e'!");
+                choice = "";
+                mainMenu ();
+            }
+        }
+    }
+
+
+    //Asks for input from the user- asks for word1, phrase, and word2
+    public static void askData ()
+    {
+        title ();
+        c.setCursor (3, 1);
+        c.print ("Please enter a phrase: ");
+        phrase = c.readLine ();
+        c.setCursor (5, 1);
+        c.print ("Please enter a word you want to find in the phrase: ");
+        word1 = c.readLine ();
+        c.setCursor (7, 1);
+        c.print ("Please enter a word to replace with: ");
+        word2 = c.readLine ();
+    }
+
+
+    //return method- calculates where to replace string if found
+    //local variable dictionary:
+    //answer (String): Phrase returned if the string is found and replaced
+    //counter (int): keeps track of how many letters of the first word is found (positive integer)
+    //index (int): keeps track of where the letter is found on word1 (if found). When y is increased, the program will start searching from one letter after the last letter was found on word1. This way, it makes sure the whole word is found rather than the letters of the word is found in different places.
+    private static String replaceFirstString (String word1, String phrase, String word2)
+    {
+        String answer = "";
+        int y, counter = 0, index = 0;
+        //loops depending on how long the phrase is. It goes through every single letter of the phrase.
+        for (y = 0 ; y < phrase.length () ; y++)
+        {
+            int x = index;
+            //loops depending on how long word1 is. It goes through every single letter of word1. The do-while loop ensures that the loop runs at least once.
+            do
+            {
+                //makes sure that x is less than the length of word1, or else, it will crash when it hits charAt if x is equal to or greater than the length of word1. This occurs when a character found on the phrase is found on the last character of word1. Since x is index + 1, then it is possible that x is equal to the lenght of word1.
+                if (x < word1.length ())
+                {
+                    //If the character at x on word1 is lower case and the character at y on phrase is upper case
+                    if (word1.charAt (x) >= 97 && word1.charAt (x) <= 122 && phrase.charAt (y) <= 90 && phrase.charAt (y) >= 65)
+                    {
+                        //If the character at x on word1 is equal to the character at y on phrase (non-case sensitive)
+                        if (word1.charAt (x) == phrase.charAt (y) + 32)
+                        {
+                            counter++;
+                            index = x + 1;
+                            break;
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is lower case and the letter at y on the phrase is upper case.
+                        else if (x != 0 && word1.charAt (x - 1) >= 97 && word1.charAt (x - 1) <= 122 && phrase.charAt (y) <= 90 && phrase.charAt (y) >= 65)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x) == phrase.charAt (y - 1) + 32)
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is upper case and the letter at y on the phrase is lower case.
+                        else if (x != 0 && word1.charAt (x - 1) <= 90 && word1.charAt (x - 1) >= 65 && phrase.charAt (y) >= 97 && phrase.charAt (y) <= 122)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x - 1) + 32 == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello).
+                        else
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (x != 0 && word1.charAt (x - 1) == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //otherwise, index and counter is reset to 0.
+                        index = 0;
+                        counter = 0;
+                    }
+                    //If the character at x on word1 is upper case and the character at y on phrase is lower case
+                    else if (word1.charAt (x) <= 90 && word1.charAt (x) >= 65 && phrase.charAt (y) >= 97 && phrase.charAt (y) <= 122)
+                    {
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                        if (word1.charAt (x) + 32 == phrase.charAt (y))
+                        {
+                            counter++;
+                            index = x + 1;
+                            break;
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is lower case and the letter at y on the phrase is upper case.
+                        else if (x != 0 && word1.charAt (x - 1) >= 97 && word1.charAt (x - 1) <= 122 && phrase.charAt (y) <= 90 && phrase.charAt (y) >= 65)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x) == phrase.charAt (y - 1) + 32)
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is upper case and the letter at y on the phrase is lower case.
+                        else if (x != 0 && word1.charAt (x - 1) <= 90 && word1.charAt (x - 1) >= 65 && phrase.charAt (y) >= 97 && phrase.charAt (y) <= 122)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x - 1) + 32 == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello).
+                        else
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (x != 0 && word1.charAt (x - 1) == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //otherwise, index and counter is reset to 0.
+                        index = 0;
+                        counter = 0;
+                    }
+                    //If the character is not a letter on the English alphabet or the 2 letters are the same case
+                    else
+                    {
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                        if (word1.charAt (x) == phrase.charAt (y))
+                        {
+                            counter++;
+                            index = x + 1;
+                            break;
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is lower case and the letter at y on the phrase is upper case.
+                        else if (x != 0 && word1.charAt (x - 1) >= 97 && word1.charAt (x - 1) <= 122 && phrase.charAt (y) <= 90 && phrase.charAt (y) >= 65)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x) == phrase.charAt (y - 1) + 32)
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello). This specifically checks if letter at x-1 on word1 is upper case and the letter at y on the phrase is lower case.
+                        else if (x != 0 && word1.charAt (x - 1) <= 90 && word1.charAt (x - 1) >= 65 && phrase.charAt (y) >= 97 && phrase.charAt (y) <= 122)
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (word1.charAt (x - 1) + 32 == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+
+                        }
+                        //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. This is necessary because when a letter is when there is a match between two characters on the two strings, index increases by one and therefore, the program starts to check from the following letter on word1. It is therefore possible that the program will miss a word being found without this if structure (e.g. word1 = hello, phrase = hhello).
+                        else
+                        {
+                            //This checks if the letter at x-1 on word1 is equals to the letter at y on the phrase. If so, index is set to x (so the program will start checking from x when y is increased), the counter is set to 1 because a matched character is found, and the loop breaks.
+                            if (x != 0 && word1.charAt (x - 1) == phrase.charAt (y))
+                            {
+                                index = x;
+                                counter = 1;
+                                break;
+                            }
+                        }
+                        //otherwise, index and counter is reset to 0.
+                        index = 0;
+                        counter = 0;
+                    }
+                    x++;
+                }
+                //If x is equal to or greater than the length of the word, then index and counter are reset to 0.
+                else
+                {
+                    index = 0;
+                    counter = 0;
+                }
+            }
+            //loop stops when it reaches to the end of word1
+            while (x < word1.length ());
+            //If counter is equal to the lenght of word1, and therefore the word is found on the phrase
+            if (counter == word1.length ())
+            {
+                //answer is equal to the beginning of the phrase up to where the beginning of the word is found
+                for (int z = 0 ; z < (y - word1.length () + 1) ; z++)
+                {
+                    answer = answer + phrase.charAt (z);
+                }
+                //inserts the word
+                answer = answer + word2;
+                //inserts the last part of the phrase from where the end of the word is found
+                for (int z = y + 1 ; z < phrase.length () ; z++)
+                {
+                    answer = answer + phrase.charAt (z);
+                }
+                return answer;
+            }
+
+        }
+        //returns original phrase if string is not found in the phrase
+        return phrase;
+
+    }
+
+
+    //displays the inputs and answer
+    public static void display ()
+    {
+        title ();
+        c.setCursor (3, 1);
+        c.println ("You wish to replace '" + word1 + "' found in '" + phrase + "' with '" + word2 + "'.");
+        c.setCursor (5, 1);
+        c.println ("Here is the phrase: " + replaceFirstString (word1, phrase, word2));
+        c.setCursor (7, 1);
+        c.println ("Press any key to continue...");
+        c.getChar ();
+    }
+
+
+    //Good Bye- closes the window
+    public static void goodBye ()
+    {
+        title ();
+        c.setCursor (3, 1);
+        c.println ("Thanks for using this!");
+        c.setCursor (5, 1);
+        c.println ("Program by: Ling-Sang Tse");
+        c.setCursor (7, 1);
+        c.println ("Press any key to continue...");
+        c.getChar ();
+        c.close ();
+    }
+
+
+    //Class constructor
+    public Strings ()
+    {
+        c = new Console ("Strings");
+    }
+
+
+    //beginning of main method
+    public static void main (String[] args)
+    {
+        Strings d;
+        d = new Strings ();
+        d.intro ();
+        //program repeats while the user chooses to continue
+        do
+        {
+            d.mainMenu ();
+            //continues if the user chooses continue in main menu
+            if (choice.equalsIgnoreCase ("c"))
+            {
+                d.askData ();
+                d.display ();
+            }
+        } //repeats while user choose c
+        while (choice.equalsIgnoreCase ("c"));
+        d.goodBye ();
+    } // end of the main program
+}
+

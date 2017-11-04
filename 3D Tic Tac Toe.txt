@@ -1,0 +1,752 @@
+import java.awt.*;
+import hsa.*;
+import java.io.*;
+
+public class ISP8
+{
+    static Console c;
+    static int choice, square, remove, counter2 = 0; //counter2 = number of winners
+    static String player[] = new String [2];
+    static boolean tracking[] = new boolean [27];
+    static String winners[] [] = new String [100] [2];
+    static String confirm;
+
+    public static void title ()
+    {
+        c.setTextBackgroundColor (Color.orange);
+        c.setTextColor (Color.yellow);
+        c.clear ();
+        c.setCursor (1, 33);
+        c.println ("3D Tic Tac Toe");
+        c.println ();
+        Color darkIndigo = new Color (63, 27, 139);
+        c.setTextColor (darkIndigo);
+
+    }
+
+
+    public static void game ()
+    {
+        c.setColor (Color.orange);
+        c.fillRect (10, 83, 620, 200);
+        c.setColor (Color.black);
+        for (int x = 0 ; x < 430 ; x += 200)
+        {
+            c.drawLine (10 + x, 150, x + 200, 150);
+            c.drawLine (10 + x, 217, x + 200, 217);
+            c.drawLine (x + 77, 83, x + 77, 283);
+            c.drawLine (x + 144, 83, x + 144, 283);
+        }
+
+    }
+
+
+    public static void intro ()
+    {
+        title ();
+        for (int x = 0 ; x < 100 ; x++)
+        {
+            winners [x] [0] = "";
+            winners [x] [1] = "0";
+        }
+
+        c.setCursor (3, 1);
+        c.println ("This program will let you play 3D Tic Tac Toe with a friend!");
+        game ();
+        for (int x = 0 ; x < 430 ; x += 200)
+        {
+            c.setColor (Color.green);
+            c.fillOval (x + 30, 100, 40, 40);
+            try
+            {
+                Thread.sleep (500);
+            }
+            catch (Exception e)
+            {
+            }
+
+        }
+        try
+        {
+            Thread.sleep (1000);
+        }
+        catch (Exception e)
+        {
+        }
+        game ();
+        try
+        {
+            Thread.sleep (500);
+        }
+        catch (Exception e)
+        {
+        }
+        for (int x = 0 ; x < 430 ; x += 200)
+        {
+            c.setColor (Color.red);
+            c.fillOval (x + 90, x / 3 + 100, 40, 40);
+            try
+            {
+                Thread.sleep (500);
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        try
+        {
+            Thread.sleep (1000);
+        }
+        catch (Exception e)
+        {
+        }
+        Color darkRed = new Color (165, 19, 3);
+        for (int x = 0 ; x < 600 ; x++)
+        {
+            c.setColor (Color.orange);
+            c.fillOval (x - 1, 349, 42, 42);
+            c.setColor (darkRed);
+            c.fillOval (x, 350, 40, 40);
+            try
+            {
+                Thread.sleep (5);
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+    }
+
+
+    public static void mainMenu ()
+    {
+
+        title ();
+
+        c.setCursor (3, 36);
+        c.println ("Main Menu");
+        c.setCursor (5, 37);
+        c.println ("1. Play");
+        c.setCursor (6, 33);
+        c.println ("2. Remove Player");
+        c.setCursor (7, 34);
+        c.println ("3. High Scores");
+        c.setCursor (8, 37);
+        c.println ("4. Exit");
+        try
+        {
+            c.setCursor (10, 29);
+            c.print ("Please make a selection: ");
+            choice = Integer.parseInt (c.readLine ());
+            if (choice < 1 || choice > 4)
+            {
+                new Message ("You must enter a number between 1 and 4 (inclusive)!");
+                mainMenu ();
+            }
+
+        }
+        catch (NumberFormatException e)
+        {
+            new Message ("You must enter an integer!");
+            mainMenu ();
+        }
+
+
+    }
+
+
+    public static void goodBye ()
+    {
+        title ();
+        c.setCursor (3, 1);
+        c.println ("Thanks for play 3D Tic Tac Toe!");
+        c.setCursor (5, 1);
+        c.println ("Program by: Ling-Sang Tse");
+        c.setCursor (7, 1);
+        c.println ("Press any key to continue...");
+        c.getChar ();
+        c.close ();
+    }
+
+
+    public static boolean selection (String player)
+    {
+        int counter = 0;
+        for (int y = 65 ; y <= 119 ; y++)
+        {
+            for (int x = 0 ; x < player.length () ; x++)
+            {
+                if (player.charAt (x) == y)
+                    counter++;
+            }
+            if (counter == 3)
+                return true;
+            counter = 0;
+        }
+        return false;
+    }
+
+
+    public static void removePlayer ()
+    {
+        title ();
+        int x;
+        c.setCursor (3, 32);
+        c.println ("Remove a Player");
+
+
+        for (x = 0 ; x < counter2 ; x++)
+        {
+            c.setCursor (5 + x, 30);
+            c.print (x + 1 + ". " + winners [x] [0]);
+        }
+        try
+        {
+
+            if (counter2 != 0)
+            {
+                c.setCursor (7 + x, 21);
+                c.print ("Please choose a number or enter 0 to cancel: ");
+            }
+            else
+            {
+                c.setCursor (5, 27);
+                c.print ("Please enter 0 to go back: ");
+            }
+            remove = Integer.parseInt (c.readLine ());
+            if (remove < 0 || remove > counter2)
+            {
+                new Message ("Please enter a valid number!");
+                removePlayer ();
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            new Message ("You must enter an integer!");
+            removePlayer ();
+        }
+        if (remove != 0)
+        {
+            for (x = remove ; x < counter2 ; x++)
+            {
+                winners [x - 1] [0] = winners [x] [0];
+                winners [x - 1] [1] = winners [x] [1];
+            }
+            winners [counter2 - 1] [0] = "";
+            winners [counter2 - 1] [1] = "";
+            counter2--;
+        }
+    }
+
+
+    public static void highScores () throws IOException
+    {
+        title ();
+
+        PrintWriter out = new PrintWriter (new FileWriter ("HIGHSCORES.txt"));
+        for (int x = 0 ; x < counter2 - 1 ; x++)
+        {
+            for (int y = 0 ; y < counter2 - x - 1 ; y++)
+            {
+                if (Integer.parseInt (winners [y] [1]) < Integer.parseInt (winners [y + 1] [1]))
+                {
+                    int exchange = Integer.parseInt (winners [y] [1]);
+                    String exchange2 = winners [y] [0];
+                    winners [y] [0] = winners [y + 1] [0];
+                    winners [y] [1] = Integer.parseInt (winners [y + 1] [1]) + "";
+                    winners [y] [0] = winners [y + 1] [0];
+                    winners [y + 1] [1] = exchange + "";
+                    winners [y + 1] [0] = exchange2;
+
+                }
+            }
+        }
+        out.println ("High Scores");
+        out.println ();
+        out.println ("Player: Score");
+        out.println ();
+        c.setCursor (3, 34);
+        c.println ("High Scores");
+        for (int y = 0 ; y < counter2 ; y++)
+        {
+            c.setCursor (5 + y, 20);
+            c.print (winners [y] [0]);
+            c.setCursor (5 + y, 60);
+            c.println (winners [y] [1]);
+            out.print (winners [y] [0] + ": ");
+            out.println (winners [y] [1]);
+
+        }
+        out.close ();
+        c.setCursor (23, 1);
+        c.println ("Press any key to return to the Main Menu...");
+        c.getChar ();
+
+
+    }
+
+
+    public static void display (int playerNumber)
+    {
+        if (square == 1)
+        {
+            c.fillOval (30, 100, 40, 40);
+            tracking [0] = true;
+            player [playerNumber] = player [playerNumber] + "AJSyhnt";
+        }
+
+
+        else if (square == 2)
+        {
+            c.fillOval (90, 100, 40, 40);
+            tracking [1] = true;
+            player [playerNumber] = player [playerNumber] + "AKbi";
+
+        }
+
+
+        else if (square == 3)
+        {
+            c.fillOval (150, 100, 40, 40);
+            tracking [2] = true;
+            player [playerNumber] = player [playerNumber] + "ALTejqu";
+        }
+
+
+        else if (square == 4)
+        {
+            c.fillOval (30, 160, 40, 40);
+            tracking [3] = true;
+            player [playerNumber] = player [playerNumber] + "BJZo";
+        }
+
+
+        else if (square == 5)
+        {
+            c.fillOval (90, 160, 40, 40);
+            tracking [4] = true;
+            player [playerNumber] = player [playerNumber] + "BKSTc";
+        }
+
+
+        else if (square == 6)
+        {
+            c.fillOval (150, 160, 40, 40);
+            tracking [5] = true;
+            player [playerNumber] = player [playerNumber] + "BLfr";
+        }
+
+
+        else if (square == 7)
+        {
+            c.fillOval (30, 230, 40, 40);
+            tracking [6] = true;
+            player [playerNumber] = player [playerNumber] + "CJTakpv";
+        }
+
+
+        else if (square == 8)
+        {
+            c.fillOval (90, 230, 40, 40);
+            tracking [7] = true;
+            player [playerNumber] = player [playerNumber] + "CKdlw";
+        }
+
+
+        else if (square == 9)
+        {
+            c.fillOval (150, 230, 40, 40);
+            tracking [8] = true;
+            player [playerNumber] = player [playerNumber] + "CLSgm";
+        }
+
+
+        else if (square == 10)
+        {
+            c.fillOval (230, 100, 40, 40);
+            tracking [9] = true;
+            player [playerNumber] = player [playerNumber] + "DMUY";
+        }
+
+
+        else if (square == 11)
+        {
+            c.fillOval (290, 100, 40, 40);
+            tracking [10] = true;
+            player [playerNumber] = player [playerNumber] + "DNbnq";
+        }
+
+
+        else if (square == 12)
+        {
+            c.fillOval (350, 100, 40, 40);
+            tracking [11] = true;
+            player [playerNumber] = player [playerNumber] + "DOVe";
+        }
+
+
+        else if (square == 13)
+        {
+            c.fillOval (230, 160, 40, 40);
+            tracking [12] = true;
+            player [playerNumber] = player [playerNumber] + "EMZhk";
+        }
+
+
+        else if (square == 14)
+        {
+            c.fillOval (290, 160, 40, 40);
+            tracking [13] = true;
+            player [playerNumber] = player [playerNumber] + "ENUVcilortuvw";
+        }
+
+
+        else if (square == 15)
+        {
+            c.fillOval (350, 160, 40, 40);
+            tracking [14] = true;
+            player [playerNumber] = player [playerNumber] + "EOfjm";
+        }
+
+
+        else if (square == 16)
+        {
+            c.fillOval (230, 230, 40, 40);
+            tracking [15] = true;
+            player [playerNumber] = player [playerNumber] + "FMVa";
+        }
+
+
+        else if (square == 17)
+        {
+            c.fillOval (290, 230, 40, 40);
+            tracking [16] = true;
+            player [playerNumber] = player [playerNumber] + "FNdp";
+        }
+
+
+        else if (square == 18)
+        {
+            c.fillOval (350, 230, 40, 40);
+            tracking [17] = true;
+            player [playerNumber] = player [playerNumber] + "FOUgs";
+        }
+
+
+        else if (square == 19)
+        {
+            c.fillOval (430, 100, 40, 40);
+            tracking [18] = true;
+            player [playerNumber] = player [playerNumber] + "GPWYkqw";
+        }
+
+
+        else if (square == 20)
+        {
+            c.fillOval (490, 100, 40, 40);
+            tracking [19] = true;
+            player [playerNumber] = player [playerNumber] + "GQbl";
+        }
+
+
+        else if (square == 21)
+        {
+            c.fillOval (550, 100, 40, 40);
+            tracking [20] = true;
+            player [playerNumber] = player [playerNumber] + "GRXemnv";
+        }
+
+
+        else if (square == 22)
+        {
+            c.fillOval (430, 160, 40, 40);
+            tracking [21] = true;
+            player [playerNumber] = player [playerNumber] + "HPZr";
+        }
+
+
+        else if (square == 23)
+        {
+            c.fillOval (490, 160, 40, 40);
+            tracking [22] = true;
+            player [playerNumber] = player [playerNumber] + "HQWXc";
+        }
+
+
+        else if (square == 24)
+        {
+            c.fillOval (550, 160, 40, 40);
+            tracking [23] = true;
+            player [playerNumber] = player [playerNumber] + "RHfo";
+        }
+
+
+        else if (square == 25)
+        {
+            c.fillOval (430, 230, 40, 40);
+            tracking [24] = true;
+            player [playerNumber] = player [playerNumber] + "IPXahsu";
+
+        }
+
+
+        else if (square == 26)
+        {
+            c.fillOval (490, 230, 40, 40);
+            tracking [25] = true;
+            player [playerNumber] = player [playerNumber] + "IQdis";
+        }
+
+
+        else
+        {
+            if (square == 27)
+            {
+                c.fillOval (550, 230, 40, 40);
+                tracking [26] = true;
+                player [playerNumber] = player [playerNumber] + "IRWgjpt";
+            }
+        }
+
+ 
+
+
+    }
+
+
+    public static int searchWinner (String[] [] winners, String winner)
+    {
+        for (int x = 0 ; x < counter2 ; x++)
+        {
+            if (winners [x] [0].equalsIgnoreCase (winner))
+            {
+                return x;
+            }
+        }
+        winners [counter2] [0] = winner;
+        counter2++;
+
+        return counter2 - 1;
+    }
+
+
+    public static void askData () throws IOException
+
+    {
+        square = -3;
+        player [0] = "";
+        player [1] = "";
+        title ();
+        for (int x = 0 ; x < 27 ; x++)
+        {
+            tracking [x] = false;
+        }
+        game ();
+
+        for (int x = 0 ; x < 3 ; x++)
+        {
+            c.setCursor (6, x * 8 + 6);
+            c.print (x + 1);
+            c.setCursor (10, x * 8 + 6);
+            c.print (x + 4);
+            c.setCursor (13, x * 8 + 6);
+            c.print (x + 7);
+            c.setCursor (6, x * 8 + 31);
+            c.print (x + 10);
+            c.setCursor (10, x * 8 + 31);
+            c.print (x + 13);
+            c.setCursor (13, x * 8 + 31);
+            c.print (x + 16);
+            c.setCursor (6, x * 8 + 56);
+            c.print (x + 19);
+            c.setCursor (10, x * 8 + 56);
+            c.print (x + 22);
+            c.setCursor (13, x * 8 + 56);
+            c.print (x + 25);
+        }
+
+
+        while (square != 0)
+        {
+
+            c.setCursor (16, 1);
+            c.println ("It's Player 1's turn!");
+            if (square != -2)
+            {
+                c.setColor (Color.red);
+                display (1);
+                if (selection (player [1]) == true)
+                {
+                    c.setCursor (20, 1);
+                    c.println ("Congratulations, Player 2!");
+                    c.print ("Please enter Player 2's name: ");
+                    String winner = c.readLine ();
+                    winners [searchWinner (winners, winner)] [1] = Integer.parseInt (winners [searchWinner (winners, winner)] [1]) + 1 + "";
+
+                    break;
+                }
+
+                try
+                {
+                    c.setCursor (18, 1);
+                    c.println ();
+                    c.setCursor (18, 1);
+                    c.print ("Please choose a square or enter 0 to return to the main menu: ");
+                    square = Integer.parseInt (c.readLine ());
+                    if (square == 0)
+                    {
+                        c.println ("To confirm, press 'q' to go to the main menu or any other key to return to the");
+                        c.print ("game: ");
+                        confirm = c.readLine ();
+                        if (confirm.equalsIgnoreCase ("q"))
+                        {
+
+                            break;
+                        }
+                        else
+                        {
+                            c.setCursor (19, 1);
+                            c.println ();
+                            square = -1;
+                        }
+
+                    }
+                    else
+                    {
+                        if (square < 1 || square > 27)
+                        {
+                            new Message ("Please a number between 0 and 27 (inclusive)!");
+                            square = -1;
+                        }
+                        else
+                        {
+                            if (tracking [square - 1] == true)
+                            {
+                                new Message ("The square is already taken! Please enter another square.");
+                                square = -1;
+                            }
+                        }
+                    }
+
+                }
+                catch (NumberFormatException e)
+                {
+                    new Message ("You must enter an integer!");
+                    square = -1;
+                }
+            }
+
+            c.setCursor (16, 1);
+            c.println ("It's Player 2's turn!");
+            if (square != -1)
+            {
+                c.setColor (Color.green);
+                display (0);
+                if (selection (player [0]) == true)
+                {
+                    c.setCursor (20, 1);
+                    c.println ("Congratulations, Player 1!");
+                    c.print ("Please enter Player 1's name: ");
+                    String winner = c.readLine ();
+                    winners [searchWinner (winners, winner)] [1] = Integer.parseInt (winners [searchWinner (winners, winner)] [1]) + 1 + "";
+
+
+                    break;
+                }
+
+                try
+                {
+                    c.setCursor (18, 1);
+                    c.println ();
+                    c.setCursor (18, 1);
+                    c.print ("Please choose a square or enter 0 to return to the main menu: ");
+                    square = Integer.parseInt (c.readLine ());
+                    if (square == 0)
+                    {
+                        c.println ("To confirm, press 'q' to go to the main menu or any other key to return to the");
+                        c.print ("game: ");
+                        confirm = c.readLine ();
+                        if (confirm.equalsIgnoreCase ("q"))
+                        {
+
+                            break;
+                        }
+                        else
+                        {
+                            c.setCursor (19, 1);
+                            c.println ();
+                            square = -2;
+                        }
+
+                    }
+                    else
+                    {
+                        if (square < 1 || square > 27)
+                        {
+                            new Message ("Please a number between 0 and 27 (inclusive)!");
+                            square = -2;
+                        }
+                        else
+                        {
+                            if (tracking [square - 1] == true)
+                            {
+                                new Message ("The square is already taken! Please enter another square.");
+                                square = -2;
+                            }
+                        }
+                    }
+
+                }
+                catch (NumberFormatException e)
+                {
+                    new Message ("You must enter an integer!");
+                    square = -2;
+                }
+            }
+
+        }
+        c.setCursor (23, 1);
+        c.println ("Press any key to continue...");
+        c.getChar ();
+        highScores ();
+
+    }
+
+ 
+
+
+    public ISP8 ()
+    {
+
+        c = new Console ("3D Tic Tac Toe");
+
+
+    }
+
+
+    public static void main (String[] args) throws IOException
+    {
+
+        ISP8 z = new ISP8 ();
+        z.intro ();
+        do
+        {
+            z.mainMenu ();
+            if (choice != 4)
+            {
+                if (choice == 1)
+                    z.askData ();
+                else if (choice == 2)
+                    z.removePlayer ();
+                else
+                    z.highScores ();
+            }
+        }
+        while (choice != 4);
+
+        z.goodBye ();
+
+
+    } //end of the main program
+}
